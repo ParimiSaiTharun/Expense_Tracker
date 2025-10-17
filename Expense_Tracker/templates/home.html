@@ -1,0 +1,59 @@
+{% extends 'base.html' %}
+{% block title %}Home | Expense Tracker{% endblock %}
+{% block content %}
+<div class="solid-hero">
+    <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Finance Icon" class="hero-icon">
+    {% if session.get('user_id') %}
+        <h1>Welcome, {{ session.get('username', 'User') }}!</h1>
+        <p>Track expenses, set budgets, and gain insights effortlessly with your professional, secure dashboard.</p>
+        <div class="hero-btns">
+            <a href="{{ url_for('dashboard.dashboard') }}" class="btn btn-primary">Dashboard</a>
+            <a href="{{ url_for('profile') }}" class="btn btn-outline">Profile</a>
+            <a href="{{ url_for('auth.logout') }}" class="btn btn-outline">Logout</a>
+        </div>
+    {% else %}
+        <h1>Manage Your Money Smarter</h1>
+        <p>Track expenses, set budgets, and gain insights effortlessly with a professional, secure dashboard.</p>
+        <div class="hero-btns">
+            <a href="{{ url_for('auth.register') }}" class="btn btn-primary">Get Started</a>
+            <a href="{{ url_for('auth.login') }}" class="btn btn-outline">Log In</a>
+        </div>
+    {% endif %}
+</div>
+<div class="about-section">
+    <h2>About Us</h2>
+    <p>Expense Tracker is designed to simplify your financial life. Our features help you manage expenses, monitor income, set budgets, and gain insights using AI-driven analytics. Stay organized and take control of your money effortlessly.</p>
+    <div class="features-list">
+        <div class="feature-item">
+            <img src="https://cdn-icons-png.flaticon.com/512/3135/3135715.png" alt="Expense Icon">
+            <h4>Easy Expense & Income Tracking</h4>
+            <p>Log and monitor all your transactions in one place.</p>
+        </div>
+        <div class="feature-item">
+            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828884.png" alt="Budget Icon">
+            <h4>Personalized Budget Management</h4>
+            <p>Set category budgets and get alerts for overspending.</p>
+        </div>
+        <div class="feature-item">
+            <img src="https://cdn-icons-png.flaticon.com/512/2721/2721297.png" alt="AI Icon">
+            <h4>AI-powered Financial Insights</h4>
+            <p>Get smart advice and summaries powered by AI.</p>
+        </div>
+        <div class="feature-item">
+            <img src="https://cdn-icons-png.flaticon.com/512/1828/1828919.png" alt="Dashboard Icon">
+            <h4>Secure & User-Friendly Dashboard</h4>
+            <p>Visualize your finances with beautiful charts.</p>
+        </div>
+        <div class="feature-item">
+            <img src="https://cdn-icons-png.flaticon.com/512/3602/3602123.png" alt="Voice Icon">
+            <h4>Voice-enabled Transactions</h4>
+            <p>Log expenses using your voice for extra convenience.</p>
+        </div>
+        <div class="feature-item">
+            <img src="https://cdn-icons-png.flaticon.com/512/747/747376.png" alt="Profile Icon">
+            <h4>Customizable Profile & Security</h4>
+            <p>Manage your account and privacy settings easily.</p>
+        </div>
+    </div>
+</div>
+{% endblock %} 

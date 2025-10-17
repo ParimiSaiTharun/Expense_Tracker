@@ -1,0 +1,221 @@
+{% extends 'base.html' %}
+{% block title %}AI Insights | Expense Tracker{% endblock %}
+{% block page_bg %}
+<div class="page-bg" style="background-image:url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80');"></div>
+{% endblock %}
+{% block content %}
+<div class="page-hero">
+    <div class="page-hero-content">
+        <div class="page-hero-icon"><i class="fa fa-robot"></i></div>
+        <h2>AI Financial Insights</h2>
+        <p class="page-hero-subtitle">Get personalized financial advice powered by AI. Ask questions and receive smart insights based on your spending patterns.</p>
+    </div>
+</div>
+<div class="insights-summary">
+    <div class="summary-card income">
+        <div class="summary-icon"><i class="fa fa-wallet"></i></div>
+        <div class="summary-label">Total Income</div>
+        <div class="summary-value">{{ total_income|inr }}</div>
+    </div>
+    <div class="summary-card expense">
+        <div class="summary-icon"><i class="fa fa-money-bill-wave"></i></div>
+        <div class="summary-label">Total Expenses</div>
+        <div class="summary-value">{{ total_expense|inr }}</div>
+    </div>
+</div>
+<div class="ai-insights-container">
+    <div class="ai-advice-card">
+        <h3><i class="fa fa-lightbulb"></i> AI Financial Advice</h3>
+        <div class="ai-advice-content">
+            {% if ai_response %}
+                {% set lines = (ai_response|inr_text).split('\n') %}
+                <ul class="ai-advice-list">
+                {% for line in lines %}
+                    {% if line.strip() %}
+                        <li>{{ line }}</li>
+                    {% endif %}
+                {% endfor %}
+                </ul>
+            {% else %}
+                <p>No advice available.</p>
+            {% endif %}
+        </div>
+    </div>
+    <div class="ai-simulation-card">
+        <h3><i class="fa fa-flask"></i> Savings Simulation</h3>
+        <form method="post" class="ai-simulation-form">
+            <label for="simulation_scenario"><strong>How much can I save if I...</strong></label><br>
+            <input type="text" name="simulation_scenario" id="simulation_scenario" class="input" placeholder="e.g., reduce dining out by 20%" {% if simulation_scenario %}value="{{ simulation_scenario }}"{% endif %} required>
+            <button type="submit" class="btn btn-success"><i class="fa fa-magic"></i> Simulate</button>
+        </form>
+        {% if simulation_result %}
+        <div class="ai-simulation-result" style="margin-top:18px;background:#e9f5ec;border-radius:10px;padding:16px 14px;">
+            <h4 style="color:#2d6a4f;font-size:1.1rem;margin-bottom:8px;"><i class="fa fa-chart-line"></i> Simulation Result:</h4>
+            {% set sim_lines = (simulation_result|inr_text).split('\n') %}
+            <ul class="ai-advice-list">
+            {% for line in sim_lines %}
+                {% if line.strip() %}
+                    <li>{{ line }}</li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+    <div class="ai-question-card">
+        <h3><i class="fa fa-question-circle"></i> Ask AI a Question</h3>
+        <form method="post" class="ai-question-form">
+            <label for="user_question"><strong>Ask a personal finance question:</strong></label><br>
+            <input type="text" name="user_question" id="user_question" class="input" placeholder="Type your question here..." {% if user_question %}value="{{ user_question }}"{% endif %} required>
+            <button type="submit" class="btn btn-primary"><i class="fa fa-paper-plane"></i> Ask AI</button>
+        </form>
+        {% if user_answer %}
+        <div class="ai-answer">
+            <h4><i class="fa fa-comment"></i> AI's Answer:</h4>
+            {% set answer_lines = (user_answer|inr_text).split('\n') %}
+            <ul class="ai-advice-list">
+            {% for line in answer_lines %}
+                {% if line.strip() %}
+                    <li>{{ line }}</li>
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<style>
+.page-hero {
+    background: linear-gradient(90deg, #e9f5ec 0%, #f8fafc 100%);
+    border-radius: 18px;
+    margin: 0 auto 32px auto;
+    padding: 36px 0 24px 0;
+    text-align: center;
+    box-shadow: 0 4px 32px rgba(64,145,108,0.07);
+}
+.page-hero-icon {
+    font-size: 2.8rem;
+    color: #40916c;
+    margin-bottom: 10px;
+}
+.page-hero-content h2 {
+    font-size: 2.3rem;
+    font-weight: bold;
+    color: #102542;
+    margin-bottom: 8px;
+}
+.page-hero-subtitle {
+    color: #555;
+    font-size: 1.15rem;
+    margin-bottom: 0;
+}
+.insights-summary {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+.summary-card {
+    flex: 1 1 220px;
+    min-width: 200px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    padding: 24px 18px 18px 18px;
+    text-align: center;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative;
+}
+.summary-card.income { border-top: 5px solid #40916c; }
+.summary-card.expense { border-top: 5px solid #ff6f61; }
+.summary-card:hover {
+    box-shadow: 0 6px 24px rgba(64,145,108,0.13);
+    transform: translateY(-2px) scale(1.03);
+}
+.summary-icon {
+    font-size: 1.7rem;
+    margin-bottom: 8px;
+    color: #40916c;
+}
+.summary-card.expense .summary-icon { color: #ff6f61; }
+.summary-label {
+    color: #555;
+    font-size: 1.08rem;
+    margin-bottom: 2px;
+}
+.summary-value {
+    font-size: 1.45rem;
+    font-weight: bold;
+    color: #102542;
+}
+.ai-insights-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+}
+.ai-advice-card, .ai-question-card {
+    flex: 1 1 400px;
+    min-width: 320px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    padding: 32px 24px 24px 24px;
+    margin-bottom: 24px;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.ai-advice-card:hover, .ai-question-card:hover {
+    box-shadow: 0 8px 32px rgba(64,145,108,0.13);
+    transform: translateY(-2px) scale(1.02);
+}
+.ai-advice-card h3, .ai-question-card h3 {
+    color: #2d6a4f;
+    font-size: 1.18rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ai-advice-content {
+    background: #e9f5ec;
+    border-radius: 12px;
+    padding: 18px 20px;
+    font-size: 1.15rem;
+}
+.ai-advice-list {
+    margin: 0 0 0 18px;
+    padding: 0;
+}
+.ai-advice-list li {
+    margin-bottom: 8px;
+}
+.ai-question-form {
+    margin-bottom: 18px;
+}
+.ai-question-form .input {
+    margin-bottom: 12px;
+}
+.ai-answer {
+    margin-top: 24px;
+    background: #e9f5ec;
+    border-radius: 10px;
+    padding: 18px 16px;
+}
+.ai-answer h4 {
+    color: #2d6a4f;
+    font-size: 1.1rem;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+@media (max-width: 900px) {
+    .insights-summary, .ai-insights-container { flex-direction: column; gap: 18px; }
+    .summary-card, .ai-advice-card, .ai-question-card { min-width: 90vw; }
+    .page-hero { padding: 24px 0 12px 0; }
+    .page-hero-content h2 { font-size: 1.4rem; }
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,276 @@
+body {
+    margin: 0;
+    padding: 0;
+    font-family: 'Segoe UI', Arial, sans-serif;
+    background: url('../images/finance-bg.jpg') no-repeat center center fixed;
+    background-size: cover;
+    min-height: 100vh;
+    color: #222;
+}
+
+.container {
+    background: rgba(255,255,255,0.85);
+    border-radius: 12px;
+    max-width: 600px;
+    margin: 40px auto;
+    padding: 32px 24px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+}
+
+h1, h2, h3 {
+    color: #2d6a4f;
+}
+
+.btn {
+    background: #40916c;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s, box-shadow 0.2s, outline 0.2s;
+    outline: none;
+    box-shadow: 0 2px 8px rgba(64,145,108,0.04);
+}
+
+.btn:hover, .btn:focus {
+    background: #1b4332;
+    box-shadow: 0 4px 16px rgba(64,145,108,0.12);
+    outline: 2px solid #b7e4c7;
+}
+
+.form {
+    max-width: 520px;
+    min-width: 320px;
+    margin: 0 auto 32px auto;
+    padding: 48px 40px;
+    background: #f8f9fa;
+    border-radius: 18px;
+    box-shadow: 0 4px 24px rgba(0,0,0,0.10);
+    font-size: 1.13rem;
+}
+.input {
+    width: 100%;
+    padding: 10px;
+    border: 1px solid #b7e4c7;
+    border-radius: 5px;
+    margin-bottom: 10px;
+    font-size: 1rem;
+}
+.input:focus {
+    outline: none;
+    border-color: #40916c;
+}
+
+.table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 24px 0;
+    background: #fff;
+    border-radius: 8px;
+    overflow: hidden;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.04);
+}
+.table th, .table td {
+    padding: 12px 16px;
+    text-align: left;
+    border-bottom: 1px solid #e9ecef;
+}
+.table th {
+    background: #b7e4c7;
+    color: #222;
+}
+.table tr:last-child td {
+    border-bottom: none;
+}
+.table tr:hover {
+    background: #e9f5ec;
+}
+
+/* Responsive containers and forms */
+@media (max-width: 700px) {
+    .container {
+        max-width: 98vw;
+        padding: 16px 4vw;
+    }
+    .form {
+        max-width: 98vw;
+        min-width: unset;
+        padding: 18px 6vw;
+    }
+    .table th, .table td {
+        padding: 8px 6px;
+        font-size: 0.98rem;
+    }
+    h1, h2, h3 {
+        font-size: 1.3rem;
+    }
+    .btn, .btn-primary, .btn-outline {
+        font-size: 0.98rem;
+        padding: 8px 14px;
+    }
+}
+
+/* Home page hero section background and styles */
+.solid-hero {
+    position: relative;
+    color: #fff;
+    padding: 64px 0 48px 0;
+    text-align: center;
+    background: none;
+}
+.solid-hero::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; width: 100%; height: 100%;
+    background: url('https://www.invest4edu.com/_next/static/media/Financial_Planning_head.671d6444.png') no-repeat center center;
+    background-size: cover;
+    opacity: 0.64; /* Much lower for watermark effect */
+    z-index: 0;
+}
+.solid-hero > * {
+    position: relative;
+    z-index: 1;
+}
+.solid-hero .hero-icon {
+    width: 72px;
+    height: 72px;
+    margin-bottom: 18px;
+    display: inline-block;
+}
+.solid-hero h1 {
+    font-size: 2.8rem;
+    font-weight: bold;
+    margin-bottom: 16px;
+    color: black; /* Lighter color for contrast */
+    text-shadow: 0 2px 8px rgba(0,0,0,0.25), 0 1px 0 #333;
+}
+.solid-hero p {
+    font-size: 1.6rem;
+    margin-bottom: 32px;
+    color: black;
+}
+.solid-hero .hero-btns {
+    display: flex;
+    gap: 18px;
+    justify-content: center;
+    flex-wrap: wrap;
+}
+.solid-hero .btn-primary {
+    background: #ffd600;
+    color: #222;
+    font-weight: bold;
+    border: none;
+    padding: 12px 32px;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    transition: background 0.2s;
+}
+.solid-hero .btn-primary:hover {
+    background: #ffc107;
+}
+.solid-hero .btn-outline {
+    background: green;
+    color: #fff;
+    border: 2px solid #fff;
+    padding: 12px 32px;
+    border-radius: 6px;
+    font-size: 1.1rem;
+    transition: background 0.2s, color 0.2s;
+}
+.solid-hero .btn-outline:hover {
+    background: #fff;
+    color: #222;
+}
+@media (max-width: 900px) {
+    .features-list { flex-direction: column; align-items: center; }
+    .feature-item { max-width: 90vw; }
+    .solid-hero h1 { font-size: 2rem; }
+}
+@media (max-width: 600px) {
+    .solid-hero { padding: 36px 0 24px 0; }
+    .solid-hero .hero-btns { flex-direction: column; gap: 10px; }
+    .about-section { padding: 24px 0 16px 0; }
+}
+/* Home page features and about section */
+.about-section {
+    background: #fff;
+    padding: 48px 0 32px 0;
+    text-align: center;
+}
+.about-section h2 {
+    color: #102542;
+    font-size: 2.2rem;
+    font-weight: bold;
+    margin-bottom: 18px;
+}
+.about-section p {
+    color: #444;
+    font-size: 1.1rem;
+    margin-bottom: 32px;
+    max-width: 700px;
+    margin-left: auto;
+    margin-right: auto;
+}
+.features-list {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 32px;
+    margin-top: 24px;
+}
+.feature-item {
+    flex: 1 1 220px;
+    max-width: 260px;
+    background: #f8f9fa;
+    border-radius: 12px;
+    padding: 28px 18px 18px 18px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    text-align: center;
+}
+.feature-item img {
+    width: 48px;
+    height: 48px;
+    margin-bottom: 12px;
+}
+.feature-item h4 {
+    color: #2d6a4f;
+    margin-bottom: 8px;
+    font-size: 1.1rem;
+}
+.feature-item p {
+    color: #333;
+    font-size: 1rem;
+    margin-bottom: 0;
+} 
+
+/* Header Bar */
+.header-bar {
+    background: #009688 !important;
+    color: #fff !important;
+}
+/* Sidebar/Nav */
+.sidebar {
+    background: #22356f !important;
+    color: #ffd600 !important;
+}
+.sidebar-nav a {
+    color: #ffd600 !important;
+}
+.sidebar-nav a.active, .sidebar-nav a:hover, .sidebar-nav a:focus {
+    background: #ffd600 !important;
+    color: #22356f !important;
+}
+.sidebar-footer {
+    background: #22356f !important;
+    color: #ffd600 !important;
+}
+/* Footer Bar */
+.footer-bar {
+    background: #009688 !important;
+    color: #fff !important;
+}
+.footer-feedback, .footer-feedback a {
+    color: #ffd600 !important;
+} 

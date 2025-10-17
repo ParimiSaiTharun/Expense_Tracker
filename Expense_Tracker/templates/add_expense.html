@@ -1,0 +1,218 @@
+{% extends 'base.html' %}
+{% block title %}Add Expense | Expense Tracker{% endblock %}
+{% block page_bg %}
+<div class="page-bg" style="background-image:url('https://images.unsplash.com/photo-1515168833906-d2a3b82b302b?auto=format&fit=crop&w=1200&q=80');"></div>
+{% endblock %}
+{% block content %}
+<div class="page-hero">
+    <div class="page-hero-content">
+        <div class="page-hero-icon"><i class="fa fa-minus-circle"></i></div>
+        <h2>Add Expense</h2>
+        <p class="page-hero-subtitle">Track your spending by adding new expenses. Use voice input for quick and convenient data entry.</p>
+    </div>
+</div>
+<div class="form-container">
+    <form method="post" class="form">
+        <h3><i class="fa fa-plus"></i> New Expense Details</h3>
+        <div class="form-group">
+            <label><i class="fa fa-rupee-sign"></i> Amount</label>
+            <input type="number" name="amount" step="0.01" required class="input" placeholder="Enter amount">
+        </div>
+        <div class="form-group">
+            <label><i class="fa fa-calendar"></i> Date</label>
+            <input type="date" name="date" class="input">
+        </div>
+        <div class="form-group">
+            <label><i class="fa fa-tags"></i> Category</label>
+            <select name="category_id" id="categorySelect" required class="input">
+                {% for cat in categories %}
+                    <option value="{{ cat.id }}">{{ cat.name }}</option>
+                {% endfor %}
+                <option value="__new__">Add new category...</option>
+            </select>
+        </div>
+        <div id="newCategoryDiv" style="display:none; margin-bottom:12px;">
+            <div class="form-group">
+                <label><i class="fa fa-plus"></i> New Category Name</label>
+                <div class="input-group">
+                    <input type="text" name="new_category" id="newCategoryInput" class="input" placeholder="Enter new category name">
+                    <button type="button" id="voiceCatBtn" class="btn btn-secondary" title="Speak to fill category"><i class="fa fa-microphone"></i></button>
+                </div>
+                <div id="voiceCatStatus" class="voice-status"></div>
+            </div>
+        </div>
+        <div class="form-group">
+            <label><i class="fa fa-comment"></i> Description</label>
+            <div class="input-group">
+                <input type="text" name="description" id="descInput" class="input" placeholder="Enter description">
+                <button type="button" id="voiceBtn" class="btn btn-secondary" title="Speak to fill description"><i class="fa fa-microphone"></i></button>
+            </div>
+            <div id="voiceStatus" class="voice-status"></div>
+        </div>
+        <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Add Expense</button>
+    </form>
+</div>
+<script>
+    // Voice for description
+    const voiceBtn = document.getElementById('voiceBtn');
+    const descInput = document.getElementById('descInput');
+    const voiceStatus = document.getElementById('voiceStatus');
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const recognition = new SpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.interimResults = false;
+        recognition.maxAlternatives = 1;
+        voiceBtn.onclick = function() {
+            voiceStatus.textContent = 'Listening...';
+            recognition.start();
+        };
+        recognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            descInput.value = transcript;
+            voiceStatus.textContent = 'Voice input captured!';
+        };
+        recognition.onerror = function(event) {
+            voiceStatus.textContent = 'Voice input error: ' + event.error;
+        };
+        recognition.onend = function() {
+            setTimeout(() => { voiceStatus.textContent = ''; }, 2000);
+        };
+    } else {
+        voiceBtn.onclick = function() {
+            voiceStatus.textContent = 'Voice input not supported in this browser.';
+        };
+    }
+    // Custom category logic
+    const categorySelect = document.getElementById('categorySelect');
+    const newCategoryDiv = document.getElementById('newCategoryDiv');
+    const newCategoryInput = document.getElementById('newCategoryInput');
+    const voiceCatBtn = document.getElementById('voiceCatBtn');
+    const voiceCatStatus = document.getElementById('voiceCatStatus');
+    categorySelect.onchange = function() {
+        if (categorySelect.value === '__new__') {
+            newCategoryDiv.style.display = 'block';
+        } else {
+            newCategoryDiv.style.display = 'none';
+            newCategoryInput.value = '';
+        }
+    };
+    // Voice for new category
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const catRecognition = new SpeechRecognition();
+        catRecognition.lang = 'en-US';
+        catRecognition.interimResults = false;
+        catRecognition.maxAlternatives = 1;
+        voiceCatBtn.onclick = function() {
+            voiceCatStatus.textContent = 'Listening...';
+            catRecognition.start();
+        };
+        catRecognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            newCategoryInput.value = transcript;
+            voiceCatStatus.textContent = 'Voice input captured!';
+        };
+        catRecognition.onerror = function(event) {
+            voiceCatStatus.textContent = 'Voice input error: ' + event.error;
+        };
+        catRecognition.onend = function() {
+            setTimeout(() => { voiceCatStatus.textContent = ''; }, 2000);
+        };
+    } else {
+        voiceCatBtn.onclick = function() {
+            voiceCatStatus.textContent = 'Voice input not supported in this browser.';
+        };
+    }
+    // Category-specific backgrounds
+    const categoryBgMap = {
+        'Food': "url('https://images.unsplash.com/photo-1504674900247-0877df9cc836?auto=format&fit=crop&w=1200&q=80')",
+        'Travel': "url('https://images.unsplash.com/photo-1465101178521-c1a9136a3b99?auto=format&fit=crop&w=1200&q=80')",
+        'Shopping': "url('https://images.unsplash.com/photo-1512436991641-6745cdb1723f?auto=format&fit=crop&w=1200&q=80')",
+        'Bills': "url('https://images.unsplash.com/photo-1464983953574-0892a716854b?auto=format&fit=crop&w=1200&q=80')",
+        'Entertainment': "url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80')",
+        'Health': "url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80')",
+        'Education': "url('https://images.unsplash.com/photo-1513258496099-48168024aec0?auto=format&fit=crop&w=1200&q=80')",
+        'Other': "url('https://images.unsplash.com/photo-1515168833906-d2a3b82b302b?auto=format&fit=crop&w=1200&q=80')"
+    };
+    const pageBg = document.querySelector('.page-bg');
+    categorySelect.addEventListener('change', function() {
+        const selected = categorySelect.options[categorySelect.selectedIndex].text;
+        if (categoryBgMap[selected]) {
+            pageBg.style.backgroundImage = categoryBgMap[selected];
+        } else {
+            pageBg.style.backgroundImage = "url('https://images.unsplash.com/photo-1515168833906-d2a3b82b302b?auto=format&fit=crop&w=1200&q=80')";
+        }
+    });
+</script>
+<style>
+.page-hero {
+    background: linear-gradient(90deg, #ffe5e5 0%, #f8fafc 100%);
+    border-radius: 18px;
+    margin: 0 auto 32px auto;
+    padding: 36px 0 24px 0;
+    text-align: center;
+    box-shadow: 0 4px 32px rgba(255,111,97,0.07);
+}
+.page-hero-icon {
+    font-size: 2.8rem;
+    color: #ff6f61;
+    margin-bottom: 10px;
+}
+.page-hero-content h2 {
+    font-size: 2.3rem;
+    font-weight: bold;
+    color: #102542;
+    margin-bottom: 8px;
+}
+.page-hero-subtitle {
+    color: #555;
+    font-size: 1.15rem;
+    margin-bottom: 0;
+}
+.form-container {
+    margin-bottom: 32px;
+}
+.form-container .form {
+    max-width: 520px;
+    margin: 0 auto;
+}
+.form-container h3 {
+    color: #2d6a4f;
+    font-size: 1.18rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.form-group {
+    margin-bottom: 18px;
+}
+.form-group label {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-weight: 500;
+    color: #2d6a4f;
+    margin-bottom: 6px;
+}
+.input-group {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+}
+.input-group .input {
+    flex: 1;
+}
+.voice-status {
+    font-size: 0.98rem;
+    color: #2563eb;
+    margin-top: 6px;
+}
+@media (max-width: 900px) {
+    .page-hero { padding: 24px 0 12px 0; }
+    .page-hero-content h2 { font-size: 1.4rem; }
+}
+</style>
+{% endblock %} 

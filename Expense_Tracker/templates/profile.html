@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+{% block title %}Profile | Expense Tracker{% endblock %}
+{% block page_bg %}
+<div class="page-bg" style="background-image:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80');"></div>
+{% endblock %}
+{% block content %}
+<h2 style="text-align:center; color:#102542; font-size:2rem; font-weight:bold; margin-bottom:32px;">Profile</h2>
+<div class="form" style="max-width: 600px; margin: 0 auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); padding: 36px 28px;">
+    <form method="post" action="{{ url_for('update_profile') }}">
+        <label>Username</label><br>
+        <input type="text" name="username" class="input" value="{{ user.username }}" required><br><br>
+        <label>Email</label><br>
+        <input type="email" name="email" class="input" value="{{ user.email }}" required><br><br>
+        <button type="submit" class="btn btn-primary">Save Changes</button>
+    </form>
+    <hr style="margin:32px 0 24px 0;">
+    <form method="post" action="{{ url_for('change_password') }}">
+        <label>Current Password</label><br>
+        <input type="password" name="current_password" class="input" required><br><br>
+        <label>New Password</label><br>
+        <input type="password" name="new_password" class="input" required><br><br>
+        <label>Confirm New Password</label><br>
+        <input type="password" name="confirm_password" class="input" required><br><br>
+        <button type="submit" class="btn btn-outline">Change Password</button>
+    </form>
+</div>
+{% endblock %} 

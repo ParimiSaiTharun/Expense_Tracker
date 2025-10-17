@@ -1,0 +1,303 @@
+{% extends 'base.html' %}
+{% block title %}Plan My Income | Expense Tracker{% endblock %}
+{% block content %}
+<div class="plan-header">
+    <h2><i class="fa fa-lightbulb"></i> Plan My Income</h2>
+    <p>Plan your income for necessary expenses, get AI advice, and use handy tools to optimize your finances.</p>
+</div>
+<div class="plan-user-details">
+    <strong>User:</strong> {{ session.get('username', 'User') }}<br>
+    <strong>Email:</strong> {{ session.get('user_email', '') }}
+</div>
+<div class="plan-controls">
+    <form method="get" class="plan-date-form" id="plan-date-form">
+        <!-- Removed start_date and end_date input fields -->
+        <button type="button" class="btn btn-secondary" onclick="updatePlanSummaryDates()" style="display:none;">Update Plan Dates</button>
+    </form>
+</div>
+<div class="plan-summary">
+    <h3>Income & Expense Summary</h3>
+    <!-- Removed Plan Start Date and Plan End Date lines -->
+    <div><strong>Income:</strong> {{ income|inr }}</div>
+    <div><strong>Expenses:</strong> {{ expenses|inr }}</div>
+</div>
+<div class="plan-entry-section">
+    <h3><i class="fa fa-pencil-alt"></i> Create Your Plan</h3>
+    {% if error_past_plan %}
+    <div class="alert alert-danger" style="background:#ffe5e5;color:#b30000;padding:10px 18px;border-radius:8px;margin-bottom:10px;">{{ error_past_plan }}</div>
+    {% endif %}
+    <form method="post" action="{{ url_for('plan.plan') }}">
+        <input type="hidden" name="plan_entry" value="1">
+        <!-- Removed hidden start_date and end_date fields -->
+        <table class="table">
+            <thead>
+                <tr>
+                    <th>Category</th>
+                    <th>Planned Amount (₹)</th>
+                    <th>Notes</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for cat in categories %}
+                <tr>
+                    <td>{{ cat.name }}</td>
+                    <td><input type="number" name="planned_amount_{{ cat.id }}" min="0" step="0.01" class="input" style="width:120px;" value="{{ user_plan.plan[cat.id|string].amount if user_plan.plan and cat.id|string in user_plan.plan else '' }}"></td>
+                    <td><input type="text" name="plan_note_{{ cat.id }}" class="input" style="width:200px;" value="{{ user_plan.plan[cat.id|string].note if user_plan.plan and cat.id|string in user_plan.plan else '' }}"></td>
+                </tr>
+                {% endfor %}
+            </tbody>
+            <tbody id="new-category-rows">
+                <tr>
+                    <td><input type="text" name="new_category_name[]" placeholder="New Category" class="input" style="width:140px;"></td>
+                    <td><input type="number" name="new_category_amount[]" min="0" step="0.01" class="input" style="width:120px;"></td>
+                    <td><input type="text" name="new_category_note[]" class="input" style="width:200px;"></td>
+                    <td><button type="button" onclick="addNewCategoryRow()">+</button></td>
+                </tr>
+            </tbody>
+        </table>
+        <div style="text-align:right;">
+            <button type="submit" class="btn btn-primary"><i class="fa fa-save"></i> Save Plan</button>
+        </div>
+    </form>
+</div>
+<div class="plan-ai-bar">
+    <h3><i class="fa fa-robot"></i> Ask AI</h3>
+    <form method="post" class="ai-form">
+        <input type="text" name="ai_question" placeholder="Ask a question about your plan..." class="input" style="width:70%;">
+        <button type="submit" class="btn">Ask</button>
+    </form>
+    {% if ai_answer %}
+        <div class="ai-suggestion-enhanced">
+            {% set lines = (ai_answer|inr_text).split('\n') %}
+            <ul class="ai-suggestion-list">
+            {% for line in lines %}
+                {% if line.strip() %}
+                    {# Heading for the first line #}
+                    {% if loop.first and 'Namaste' in line %}
+                        <li class="ai-suggestion-heading">{{ line|safe }}</li>
+                    {# Numbered list #}
+                    {% elif line.strip().startswith('1.') or line.strip().startswith('2.') or line.strip().startswith('3.') or line.strip().startswith('4.') or line.strip().startswith('5.') %}
+                        <li class="ai-suggestion-numbered">{{ line }}</li>
+                    {# Bulleted list (sub-list) #}
+                    {% elif line.strip().startswith('*') or line.strip().startswith('+') or line.strip().startswith('-') %}
+                        <ul class="ai-suggestion-bulleted"><li>{{ line[1:].strip() }}</li></ul>
+                    {# Default #}
+                    {% else %}
+                        <li>{{ line }}</li>
+                    {% endif %}
+                {% endif %}
+            {% endfor %}
+            </ul>
+        </div>
+    {% endif %}
+</div>
+<div class="plan-calculator">
+    <h3><i class="fa fa-calculator"></i> Simple Calculator</h3>
+    <div id="simple-calc" style="max-width:100%;width:100%;display:flex;flex-direction:column;align-items:center;">
+        <input type="text" id="calc-input" class="input" style="width:100%;max-width:600px;font-size:1.3rem;" placeholder="0" readonly tabindex="0">
+        <div style="display:flex;flex-wrap:wrap;justify-content:center;width:100%;max-width:600px;">
+            <div style="flex:1;min-width:220px;">
+                <div style="margin:10px 0;">
+                    <button onclick="calcAdd('1')">1</button>
+                    <button onclick="calcAdd('2')">2</button>
+                    <button onclick="calcAdd('3')">3</button>
+                    <button onclick="calcAdd('+')">+</button>
+                </div>
+                <div>
+                    <button onclick="calcAdd('4')">4</button>
+                    <button onclick="calcAdd('5')">5</button>
+                    <button onclick="calcAdd('6')">6</button>
+                    <button onclick="calcAdd('-')">-</button>
+                </div>
+                <div>
+                    <button onclick="calcAdd('7')">7</button>
+                    <button onclick="calcAdd('8')">8</button>
+                    <button onclick="calcAdd('9')">9</button>
+                    <button onclick="calcAdd('*')">×</button>
+                </div>
+                <div>
+                    <button onclick="calcAdd('0')">0</button>
+                    <button onclick="calcAdd('.')">.</button>
+                    <button onclick="calcPercent()">%</button>
+                    <button onclick="calcAdd('/')">÷</button>
+                </div>
+                <div style="margin:10px 0;">
+                    <button onclick="calcClear()">C</button>
+                    <button onclick="calcEval()">=</button>
+                </div>
+            </div>
+            <div style="flex:1;min-width:220px;display:flex;flex-direction:column;align-items:center;justify-content:center;">
+                <div style="margin-top:10px;">
+                    <label>Simple Interest: </label>
+                    <input type="number" id="si-p" placeholder="P" style="width:50px;">
+                    <input type="number" id="si-r" placeholder="R%" style="width:50px;">
+                    <input type="number" id="si-t" placeholder="T" style="width:50px;">
+                    <button onclick="calcSI()">Calc</button>
+                    <span id="si-result"></span>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<div class="plan-actions">
+    <form method="post" action="{{ url_for('plan.download_plan') }}">
+        <button type="submit" class="btn btn-primary"><i class="fa fa-download"></i> Download Plan</button>
+    </form>
+</div>
+{% if user_plan and not error_past_plan %}
+<div class="plan-actions" style="margin-top:18px;">
+    <form method="post" action="{{ url_for('plan.add_to_budget') }}">
+        <button type="submit" class="btn btn-success"><i class="fa fa-wallet"></i> Add to Budget</button>
+    </form>
+</div>
+{% endif %}
+<style>
+.plan-header { text-align:center; margin-bottom:24px; }
+.plan-header h2 { color:#009688; font-size:2rem; }
+.plan-user-details { background:#f8f9fa; border-radius:8px; padding:12px 18px; margin-bottom:18px; }
+.plan-controls { margin-bottom:18px; }
+.plan-date-form label { margin-right:8px; }
+.plan-date-form input[type=date] { margin-right:12px; }
+.plan-summary { background:#e3fcec; border-radius:8px; padding:16px 18px; margin-bottom:18px; }
+.plan-ai-bar { background:#f4f6fa; border-radius:8px; padding:16px 18px; margin-bottom:18px; }
+.ai-form { display:flex; gap:12px; align-items:center; }
+.ai-answer { background:#fffbe6; border-radius:6px; padding:10px 14px; margin-top:10px; color:#222; }
+.plan-calculator { background:#f8f9fa; border-radius:8px; padding:16px 18px; margin-bottom:18px; }
+#simple-calc button { margin:2px; padding:12px 24px; font-size:1.1rem; border-radius:4px; border:1px solid #bbb; background:#f8f9fa; cursor:pointer; }
+#simple-calc button:hover { background:#e3fcec; }
+#simple-calc input[type=text] { text-align:right; font-size:1.3rem; }
+@media (max-width: 700px) { #simple-calc { flex-direction:column; } }
+.plan-actions { text-align:right; }
+.ai-suggestion-enhanced {
+    background: #f7fafc;
+    border-radius: 12px;
+    padding: 18px 20px;
+    font-size: 1.13rem;
+    margin-bottom: 8px;
+    box-shadow: 0 2px 12px rgba(64,145,108,0.09);
+}
+.ai-suggestion-list {
+    margin: 0 0 0 18px;
+    padding: 0;
+}
+.ai-suggestion-list li {
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+.ai-suggestion-heading {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #2d6a4f;
+    margin-bottom: 10px;
+    list-style: none;
+}
+.ai-suggestion-numbered {
+    font-weight: 600;
+    color: #40916c;
+    margin-left: 0;
+}
+.ai-suggestion-bulleted {
+    margin-left: 24px;
+    color: #333;
+    font-weight: 400;
+    list-style-type: disc;
+}
+</style>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    var calcInput = '';
+    var calcInputEl = document.getElementById('calc-input');
+    // Keyboard support
+    document.addEventListener('keydown', function(e) {
+        if(document.activeElement === calcInputEl || document.activeElement === document.body) {
+            if((e.key >= '0' && e.key <= '9') || ['+','-','*','/','.'].includes(e.key)) {
+                calcAdd(e.key);
+            } else if(e.key === 'Enter' || e.key === '=') {
+                calcEval();
+            } else if(e.key === 'Backspace') {
+                calcInput = calcInput.slice(0, -1);
+                calcInputEl.value = calcInput;
+            } else if(e.key === 'c' || e.key === 'C') {
+                calcClear();
+            } else if(e.key === '%') {
+                calcPercent();
+            }
+        }
+    });
+    window.calcAdd = function(val) {
+        calcInput += val;
+        calcInputEl.value = calcInput;
+    };
+    window.calcClear = function() {
+        calcInput = '';
+        calcInputEl.value = '';
+    };
+    window.calcEval = function() {
+        try {
+            calcInputEl.value = eval(calcInput);
+            calcInput = ''+eval(calcInput);
+        } catch(e) {
+            calcInputEl.value = 'Err';
+            calcInput = '';
+        }
+    };
+    window.calcPercent = function() {
+        try {
+            calcInputEl.value = eval(calcInput)/100;
+            calcInput = ''+eval(calcInput)/100;
+        } catch(e) {
+            calcInputEl.value = 'Err';
+            calcInput = '';
+        }
+    };
+    window.calcSI = function() {
+        let p = parseFloat(document.getElementById('si-p').value);
+        let r = parseFloat(document.getElementById('si-r').value);
+        let t = parseFloat(document.getElementById('si-t').value);
+        if(isNaN(p)||isNaN(r)||isNaN(t)) { document.getElementById('si-result').innerText = 'Invalid'; return; }
+        let si = (p*r*t)/100;
+        document.getElementById('si-result').innerText = '₹'+si.toFixed(2);
+    };
+});
+function addNewCategoryRow() {
+    var tbody = document.getElementById('new-category-rows');
+    var row = document.createElement('tr');
+    row.innerHTML = `<td><input type="text" name="new_category_name[]" placeholder="New Category" class="input" style="width:140px;"></td>
+        <td><input type="number" name="new_category_amount[]" min="0" step="0.01" class="input" style="width:120px;"></td>
+        <td><input type="text" name="new_category_note[]" class="input" style="width:200px;"></td>
+        <td><button type="button" onclick="addNewCategoryRow()">+</button></td>`;
+    tbody.appendChild(row);
+}
+function setThisMonth() {
+    fetch('/plan/first_txn_date?period=month')
+        .then(response => response.json())
+        .then(data => {
+            // Always set start date to first day of this month
+            const now = new Date();
+            const firstDay = new Date(now.getFullYear(), now.getMonth(), 1);
+            document.querySelector('input[name=start_date]').value = firstDay.toISOString().slice(0,10);
+            document.querySelector('input[name=end_date]').value = data.end_date;
+        });
+}
+function setThisYear() {
+    fetch('/plan/first_txn_date?period=year')
+        .then(response => response.json())
+        .then(data => {
+            document.querySelector('input[name=start_date]').value = data.start_date;
+            document.querySelector('input[name=end_date]').value = data.end_date;
+        });
+}
+function updatePlanSummaryDates() {
+    const start = document.getElementById('plan-start-date').value;
+    const end = document.getElementById('plan-end-date').value;
+    document.getElementById('plan-summary-start').innerText = formatDDMMYYYY(start);
+    document.getElementById('plan-summary-end').innerText = formatDDMMYYYY(end);
+}
+function formatDDMMYYYY(dateStr) {
+    if (!dateStr) return '';
+    const parts = dateStr.split('-');
+    if (parts.length !== 3) return dateStr;
+    return `${parts[2]}/${parts[1]}/${parts[0]}`;
+}
+</script>
+{% endblock %} 

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>{% block title %}Expense Tracker{% endblock %}</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        body {
+            margin: 0;
+            padding: 0;
+            font-family: 'Segoe UI', Arial, sans-serif;
+            background: #f4f6fa;
+            color: #222;
+            min-height: 100vh;
+        }
+        .header-bar {
+            width: 100vw;
+            background: #2563eb; /* Lighter blue */
+            color: #fff;
+            padding: 0;
+            margin: 0;
+            text-align: center;
+            font-size: 2rem;
+            font-weight: bold;
+            letter-spacing: 1px;
+            height: 64px;
+            line-height: 64px;
+            box-shadow: 0 2px 8px rgba(16,37,66,0.07);
+        }
+        .layout {
+            display: flex;
+            min-height: calc(100vh - 64px);
+        }
+        .sidebar {
+            background: #102542;
+            color: #fff;
+            width: 230px;
+            min-width: 180px;
+            display: flex;
+            flex-direction: column;
+            align-items: stretch;
+            padding: 0;
+            box-shadow: 2px 0 12px rgba(16,37,66,0.07);
+        }
+        .sidebar-user {
+            font-size: 1.1rem;
+            font-weight: 500;
+            padding: 18px 0 8px 0;
+            text-align: center;
+            background: #102542;
+        }
+        .sidebar-nav {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 0 0 24px 0;
+        }
+        .sidebar-nav a {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            color: #fff;
+            text-decoration: none;
+            padding: 12px 28px;
+            font-size: 1.08rem;
+            border: none;
+            background: none;
+            border-radius: 8px 0 0 8px;
+            transition: background 0.18s, color 0.18s;
+        }
+        .sidebar-nav a.active, .sidebar-nav a:hover, .sidebar-nav a:focus {
+            background: #ffd600;
+            color: #102542;
+            outline: none;
+        }
+        .sidebar-footer {
+            margin-top: auto;
+            padding: 18px 0;
+            text-align: center;
+            font-size: 0.98rem;
+            background: #102542;
+            color: #fff;
+        }
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        .main-container {
+            max-width: 100vw;
+            margin: 36px auto 32px auto;
+            background: #fff;
+            border-radius: 18px;
+            box-shadow: 0 4px 24px rgba(16,37,66,0.07);
+            padding: 36px 32px;
+        }
+        @media (max-width: 900px) {
+            .main-container { padding: 18px 6vw; }
+        }
+        @media (max-width: 700px) {
+            .layout { flex-direction: column; }
+            .sidebar {
+                flex-direction: row;
+                width: 100vw;
+                min-width: 0;
+                height: 60px;
+                box-shadow: 0 2px 12px rgba(16,37,66,0.07);
+                align-items: center;
+                justify-content: space-between;
+                padding: 0 8px;
+            }
+            .sidebar-user { display: none; }
+            .sidebar-nav {
+                flex-direction: row;
+                gap: 2px;
+                padding: 0;
+            }
+            .sidebar-nav a {
+                padding: 8px 10px;
+                font-size: 0.98rem;
+                border-radius: 8px;
+            }
+            .sidebar-footer { display: none; }
+            .main-container { padding: 10px 2vw; margin: 16px 0; }
+        }
+        .footer-bar {
+            width: 100vw;
+            background: #1b1b32; /* Contrasting dark color */
+            color: #fff;
+            text-align: center;
+            padding: 18px 0 8px 0;
+            font-size: 1rem;
+            margin-top: 0;
+            position: relative;
+        }
+        .footer-contact {
+            margin: 0 auto 8px auto;
+            font-size: 1.05rem;
+        }
+        .footer-feedback {
+            font-size: 1.08rem;
+            color: #ffd600;
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .footer-feedback a {
+            color: #ffd600;
+            text-decoration: underline;
+            font-weight: bold;
+        }
+        /* Page-specific background */
+        .page-bg {
+            position: fixed;
+            top: 64px;
+            left: 0;
+            width: 100vw;
+            height: calc(100vh - 64px);
+            z-index: -1;
+            background-size: cover;
+            background-position: center;
+            opacity: 0.13;
+        }
+    </style>
+    {% block page_bg %}{% endblock %}
+</head>
+<body>
+    <div class="header-bar">Expense Tracker</div>
+    <div class="layout">
+        <aside class="sidebar">
+            {% if session.get('user_id') %}
+                <div class="sidebar-user"><i class="fa fa-user"></i> {{ session.get('username', 'User') }}</div>
+            {% endif %}
+            <nav class="sidebar-nav">
+                <a href="{{ url_for('home') }}" title="Go to Home" aria-label="Home"><i class="fa fa-home"></i> Home</a>
+                {% if session.get('user_id') %}
+                    <a href="{{ url_for('dashboard.dashboard') }}" title="View Dashboard" aria-label="Dashboard"><i class="fa fa-chart-pie"></i> Dashboard</a>
+                    <a href="{{ url_for('plan.plan') }}" title="Plan My Income" aria-label="Plan My Income"><i class="fa fa-lightbulb"></i> Plan My Income</a>
+                    <a href="{{ url_for('transactions.add_expense') }}" title="Add a new expense" aria-label="Add Expense"><i class="fa fa-minus-circle"></i> Add Expense</a>
+                    <a href="{{ url_for('transactions.view_expenses') }}" title="View all expenses" aria-label="View Expenses"><i class="fa fa-list"></i> View Expenses</a>
+                    <a href="{{ url_for('transactions.add_income') }}" title="Add a new income" aria-label="Add Income"><i class="fa fa-plus-circle"></i> Add Income</a>
+                    <a href="{{ url_for('transactions.view_income') }}" title="View all income" aria-label="View Income"><i class="fa fa-list-alt"></i> View Income</a>
+                    <a href="{{ url_for('categories.manage_categories') }}" title="Manage your categories" aria-label="Manage Categories"><i class="fa fa-tags"></i> Categories</a>
+                    <a href="{{ url_for('budget.manage_budgets') }}" title="Set and view budgets" aria-label="Budgets"><i class="fa fa-wallet"></i> Budgets</a>
+                    <a href="{{ url_for('report.reports') }}" title="View reports" aria-label="Reports"><i class="fa fa-file-alt"></i> Reports</a>
+                    <a href="{{ url_for('ai.ai_insights') }}" title="Get AI financial insights" aria-label="AI Insights"><i class="fa fa-robot"></i> AI Insights</a>
+                    <a href="{{ url_for('auth.logout') }}" title="Logout from your account" aria-label="Logout"><i class="fa fa-sign-out-alt"></i> Logout</a>
+                {% else %}
+                    <a href="{{ url_for('auth.login') }}" title="Login to your account" aria-label="Login"><i class="fa fa-sign-in-alt"></i> Login</a>
+                    <a href="{{ url_for('auth.register') }}" title="Register a new account" aria-label="Register"><i class="fa fa-user-plus"></i> Register</a>
+                {% endif %}
+            </nav>
+        </aside>
+        <div class="main-content">
+            <div class="main-container">
+                {% block content %}{% endblock %}
+            </div>
+        </div>
+    </div>
+    <footer class="footer-bar">
+        <div class="footer-contact">
+            <i class="fa fa-phone"></i> +91-9876543210 &nbsp; | &nbsp;
+            <i class="fa fa-envelope"></i> support@expensetracker.com
+        </div>
+        <div class="footer-feedback">
+            For feedback, email: <a href="mailto:sai13tharun05@gmail.com">sai13tharun05@gmail.com</a>
+        </div>
+        <div style="margin-top:8px; color:#fff;">&copy; {{ 2025 }} Expense Tracker. All rights reserved.</div>
+    </footer>
+</body>
+</html> 

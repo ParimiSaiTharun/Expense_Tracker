@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% block title %}Dashboard | Expense Tracker{% endblock %}
+{% block content %}
+<div class="dashboard-hero">
+    <div class="dashboard-hero-content">
+        <div class="dashboard-hero-icon"><i class="fa fa-chart-line"></i></div>
+        <h2>Financial Dashboard</h2>
+        <p class="dashboard-hero-subtitle">Your finances at a glance. Visualize your spending, income, and trends with beautiful charts and summaries.</p>
+    </div>
+</div>
+{% if personality_label or personality_explanation %}
+<div class="personality-card" style="max-width:480px;margin:24px auto 18px auto;background:#e9f5ec;border-radius:14px;box-shadow:0 2px 12px rgba(64,145,108,0.09);padding:22px 28px 18px 28px;text-align:center;">
+    <div style="font-size:1.5rem;color:#40916c;margin-bottom:8px;"><i class="fa fa-user-astronaut"></i> Spending Personality</div>
+    {% if personality_label %}
+        <div style="font-size:1.25rem;font-weight:bold;color:#2d6a4f;margin-bottom:4px;">{{ personality_label|inr_text }}</div>
+    {% endif %}
+    {% if personality_explanation %}
+        <div style="font-size:1.08rem;color:#333;">{{ personality_explanation|inr_text }}</div>
+    {% endif %}
+</div>
+{% endif %}
+<div class="dashboard-summary-row">
+    <div class="dashboard-summary-card income">
+        <div class="summary-icon"><i class="fa fa-wallet"></i></div>
+        <div class="summary-label">Total Income</div>
+        <div class="summary-value">{{ income_by_month|sum|inr }}</div>
+    </div>
+    <div class="dashboard-summary-card expense">
+        <div class="summary-icon"><i class="fa fa-money-bill-wave"></i></div>
+        <div class="summary-label">Total Expenses</div>
+        <div class="summary-value">{{ expenses_by_month|sum|inr }}</div>
+    </div>
+</div>
+<div class="dashboard-charts-row">
+    <div class="dashboard-chart-card">
+        <h3><i class="fa fa-chart-pie"></i> Spending by Category</h3>
+        <canvas id="pieChart" aria-label="Pie chart of spending by category" data-tooltip="Pie chart of spending by category" tabindex="0"></canvas>
+    </div>
+    <div class="dashboard-chart-card">
+        <h3><i class="fa fa-chart-bar"></i> Monthly Expenses vs Income</h3>
+        <canvas id="barChart" aria-label="Bar chart of monthly expenses and income" data-tooltip="Bar chart of monthly expenses and income" tabindex="0"></canvas>
+    </div>
+</div>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.2/css/all.min.css"/>
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+<script src="{{ url_for('static', filename='js/chart.js') }}"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        window.renderDashboardCharts(
+            {{ category_labels|tojson|safe }},
+            {{ category_data|tojson|safe }},
+            {{ months|tojson|safe }},
+            {{ expenses_by_month|tojson|safe }},
+            {{ income_by_month|tojson|safe }}
+        );
+        // Tooltips for accessibility
+        document.querySelectorAll('canvas[data-tooltip]').forEach(function(canvas) {
+            canvas.addEventListener('focus', function() {
+                const tip = canvas.getAttribute('data-tooltip');
+                if (tip) {
+                    const tooltip = document.createElement('div');
+                    tooltip.textContent = tip;
+                    tooltip.style.position = 'absolute';
+                    tooltip.style.background = '#222';
+                    tooltip.style.color = '#fff';
+                    tooltip.style.padding = '6px 12px';
+                    tooltip.style.borderRadius = '6px';
+                    tooltip.style.top = (canvas.offsetTop + 10) + 'px';
+                    tooltip.style.left = (canvas.offsetLeft + 10) + 'px';
+                    tooltip.style.zIndex = 1000;
+                    tooltip.className = 'chart-tooltip';
+                    document.body.appendChild(tooltip);
+                    canvas._tooltip = tooltip;
+                }
+            });
+            canvas.addEventListener('blur', function() {
+                if (canvas._tooltip) {
+                    document.body.removeChild(canvas._tooltip);
+                    canvas._tooltip = null;
+                }
+            });
+        });
+    });
+</script>
+<style>
+.dashboard-hero {
+    background: linear-gradient(90deg, #e9f5ec 0%, #f8fafc 100%);
+    border-radius: 18px;
+    margin: 0 auto 32px auto;
+    padding: 36px 0 24px 0;
+    text-align: center;
+    box-shadow: 0 4px 32px rgba(64,145,108,0.07);
+    position: relative;
+}
+.dashboard-hero-icon {
+    font-size: 2.8rem;
+    color: #40916c;
+    margin-bottom: 10px;
+}
+.dashboard-hero-content h2 {
+    font-size: 2.3rem;
+    font-weight: bold;
+    color: #102542;
+    margin-bottom: 8px;
+}
+.dashboard-hero-subtitle {
+    color: #555;
+    font-size: 1.15rem;
+    margin-bottom: 0;
+}
+.dashboard-summary-row {
+    display: flex;
+    gap: 32px;
+    justify-content: center;
+    margin-bottom: 32px;
+    flex-wrap: wrap;
+}
+.dashboard-summary-card {
+    flex: 1 1 220px;
+    min-width: 200px;
+    background: #fff;
+    border-radius: 16px;
+    box-shadow: 0 2px 12px rgba(0,0,0,0.04);
+    padding: 24px 18px 18px 18px;
+    text-align: center;
+    transition: box-shadow 0.2s, transform 0.2s;
+    position: relative;
+}
+.dashboard-summary-card.income { border-top: 5px solid #40916c; }
+.dashboard-summary-card.expense { border-top: 5px solid #ff6f61; }
+.dashboard-summary-card:hover {
+    box-shadow: 0 6px 24px rgba(64,145,108,0.13);
+    transform: translateY(-2px) scale(1.03);
+}
+.summary-icon {
+    font-size: 1.7rem;
+    margin-bottom: 8px;
+    color: #40916c;
+}
+.dashboard-summary-card.expense .summary-icon { color: #ff6f61; }
+.summary-label {
+    color: #555;
+    font-size: 1.08rem;
+    margin-bottom: 2px;
+}
+.summary-value {
+    font-size: 1.45rem;
+    font-weight: bold;
+    color: #102542;
+}
+.dashboard-charts-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+.dashboard-chart-card {
+    flex: 1 1 340px;
+    min-width: 320px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    padding: 32px 24px 24px 24px;
+    margin-bottom: 24px;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.dashboard-chart-card:hover {
+    box-shadow: 0 8px 32px rgba(64,145,108,0.13);
+    transform: translateY(-2px) scale(1.02);
+}
+.dashboard-chart-card h3 {
+    color: #2d6a4f;
+    font-size: 1.18rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+@media (max-width: 900px) {
+    .dashboard-summary-row, .dashboard-charts-row { flex-direction: column; gap: 18px; }
+    .dashboard-summary-card, .dashboard-chart-card { min-width: 90vw; }
+    .dashboard-hero { padding: 24px 0 12px 0; }
+    .dashboard-hero-content h2 { font-size: 1.4rem; }
+}
+</style>
+{% endblock %} 

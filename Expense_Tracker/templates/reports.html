@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+{% block title %}Reports | Expense Tracker{% endblock %}
+{% block page_bg %}
+<div class="page-bg" style="background-image:url('https://images.unsplash.com/photo-1506744038136-46273834b3fb?auto=format&fit=crop&w=1200&q=80');"></div>
+{% endblock %}
+{% block content %}
+<div class="page-hero">
+    <div class="page-hero-content">
+        <div class="page-hero-icon"><i class="fa fa-file-alt"></i></div>
+        <h2>Financial Reports</h2>
+        <p class="page-hero-subtitle">Comprehensive monthly and yearly expense summaries. Export your data or print for your records.</p>
+    </div>
+</div>
+<div class="page-actions">
+    <a href="{{ url_for('report.download_report') }}" class="btn btn-primary"><i class="fa fa-download"></i> Download CSV</a>
+    <a href="{{ url_for('report.download_plan_report') }}" class="btn btn-success"><i class="fa fa-download"></i> Download Plan CSV</a>
+    <button onclick="window.print()" class="btn btn-secondary"><i class="fa fa-print"></i> Print Report</button>
+</div>
+<div class="ai-summary-section" style="margin-bottom:32px;">
+    <div class="ai-summary-card">
+        <h3><i class="fa fa-robot"></i> AI Finance Summary</h3>
+        <div class="ai-summary-content">
+            {% if ai_summary %}
+                {% set lines = (ai_summary|inr_text).split('\n') %}
+                <div class="ai-summary-enhanced">
+                {% set in_numbered = false %}
+                {% set in_bulleted = false %}
+                <ul class="ai-summary-list">
+                {% for line in lines %}
+                    {% if line.strip() %}
+                        {# Heading for the first line #}
+                        {% if loop.first and 'Financial Summary:' in line %}
+                            <li class="ai-summary-heading">{{ line.replace('**Financial Summary:**', 'Financial Summary:')|safe }}</li>
+                        {# Numbered list #}
+                        {% elif line.strip().startswith('1.') or line.strip().startswith('2.') or line.strip().startswith('3.') or line.strip().startswith('4.') or line.strip().startswith('5.') %}
+                            <li class="ai-summary-numbered">{{ line }}</li>
+                        {# Bulleted list (sub-list) #}
+                        {% elif line.strip().startswith('*') or line.strip().startswith('+') or line.strip().startswith('-') %}
+                            <ul class="ai-summary-bulleted"><li>{{ line[1:].strip() }}</li></ul>
+                        {# Tip section #}
+                        {% elif 'Tip to Save More' in line %}
+                            <li class="ai-summary-tip-heading">💡 <span>{{ line.replace('**Tip to Save More:**', 'Tip to Save More:')|safe }}</span></li>
+                        {# Tip numbered points #}
+                        {% elif line.strip().startswith('1.') and 'Tip' in lines[loop.index0-1] %}
+                            <li class="ai-summary-tip">{{ line }}</li>
+                        {# Default #}
+                        {% else %}
+                            <li>{{ line }}</li>
+                        {% endif %}
+                    {% endif %}
+                {% endfor %}
+                </ul>
+                </div>
+            {% else %}
+                <p>No AI summary available.</p>
+            {% endif %}
+        </div>
+        <a href="{{ url_for('report.download_ai_summary') }}" class="btn btn-info" style="margin-top:12px;"><i class="fa fa-download"></i> Download AI Summary</a>
+    </div>
+</div>
+<div class="reports-grid">
+    <div class="report-card">
+        <h3><i class="fa fa-calendar-alt"></i> Monthly Expenses</h3>
+        <table class="table">
+            <thead><tr><th>Month</th><th>Total Spent</th></tr></thead>
+            <tbody>
+            {% for month, total in monthly.items()|sort(reverse=True) %}
+                <tr><td>{{ month[5:7] }}/{{ month[0:4] }}</td><td>{{ total|inr }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+    <div class="report-card">
+        <h3><i class="fa fa-calendar"></i> Yearly Expenses</h3>
+        <table class="table">
+            <thead><tr><th>Year</th><th>Total Spent</th></tr></thead>
+            <tbody>
+            {% for year, total in yearly.items()|sort(reverse=True) %}
+                <tr><td>{{ year }}</td><td>{{ total|inr }}</td></tr>
+            {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+<style>
+.page-hero {
+    background: linear-gradient(90deg, #e9f5ec 0%, #f8fafc 100%);
+    border-radius: 18px;
+    margin: 0 auto 32px auto;
+    padding: 36px 0 24px 0;
+    text-align: center;
+    box-shadow: 0 4px 32px rgba(64,145,108,0.07);
+}
+.page-hero-icon {
+    font-size: 2.8rem;
+    color: #40916c;
+    margin-bottom: 10px;
+}
+.page-hero-content h2 {
+    font-size: 2.3rem;
+    font-weight: bold;
+    color: #102542;
+    margin-bottom: 8px;
+}
+.page-hero-subtitle {
+    color: #555;
+    font-size: 1.15rem;
+    margin-bottom: 0;
+}
+.page-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+.btn-secondary {
+    background: #6c757d;
+    color: #fff;
+    border: none;
+    padding: 10px 24px;
+    border-radius: 6px;
+    cursor: pointer;
+    font-size: 1rem;
+    transition: background 0.2s;
+}
+.btn-secondary:hover {
+    background: #5a6268;
+}
+.reports-grid {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 32px;
+    justify-content: center;
+}
+.report-card {
+    flex: 1 1 320px;
+    min-width: 280px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    padding: 32px 24px 24px 24px;
+    margin-bottom: 24px;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.report-card:hover {
+    box-shadow: 0 8px 32px rgba(64,145,108,0.13);
+    transform: translateY(-2px) scale(1.02);
+}
+.report-card h3 {
+    color: #2d6a4f;
+    font-size: 1.18rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.ai-summary-enhanced {
+    background: #f7fafc;
+    border-radius: 12px;
+    padding: 18px 20px;
+    font-size: 1.13rem;
+    margin-bottom: 8px;
+}
+.ai-summary-list {
+    margin: 0 0 0 18px;
+    padding: 0;
+}
+.ai-summary-list li {
+    margin-bottom: 8px;
+    line-height: 1.6;
+}
+.ai-summary-heading {
+    font-size: 1.15rem;
+    font-weight: bold;
+    color: #2d6a4f;
+    margin-bottom: 10px;
+    list-style: none;
+}
+.ai-summary-numbered {
+    font-weight: 600;
+    color: #40916c;
+    margin-left: 0;
+}
+.ai-summary-bulleted {
+    margin-left: 24px;
+    color: #333;
+    font-weight: 400;
+    list-style-type: disc;
+}
+.ai-summary-tip-heading {
+    color: #ff6f61;
+    font-weight: bold;
+    margin-top: 16px;
+    margin-bottom: 6px;
+    list-style: none;
+}
+.ai-summary-tip {
+    color: #ff6f61;
+    font-weight: 500;
+    margin-left: 0;
+}
+@media print {
+    body, html { background: #fff !important; }
+    .page-bg { display: block !important; opacity: 0.12 !important; position: fixed !important; top: 0; left: 0; width: 100vw; height: 100vh; z-index: -1; }
+    .sidebar, .footer-bar, .btn, nav, aside { display: none !important; }
+    .main-content, .main-container { box-shadow: none !important; background: none !important; }
+    h2, h3, th, td { color: #222 !important; }
+}
+@media (max-width: 900px) {
+    .reports-grid { flex-direction: column; gap: 18px; }
+    .report-card { min-width: 90vw; }
+    .page-hero { padding: 24px 0 12px 0; }
+    .page-hero-content h2 { font-size: 1.4rem; }
+}
+</style>
+{% endblock %} 

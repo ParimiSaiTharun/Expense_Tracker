@@ -1,0 +1,155 @@
+{% extends 'base.html' %}
+{% block title %}Income | Expense Tracker{% endblock %}
+{% block page_bg %}
+<div class="page-bg" style="background-image:url('https://images.unsplash.com/photo-1465101046530-73398c7f28ca?auto=format&fit=crop&w=1200&q=80');"></div>
+{% endblock %}
+{% block content %}
+<div class="page-hero">
+    <div class="page-hero-content">
+        <div class="page-hero-icon"><i class="fa fa-money-bill-wave"></i></div>
+        <h2>Your Income</h2>
+        <p class="page-hero-subtitle">View and manage all your income records. Export your data or add new income sources.</p>
+    </div>
+</div>
+<div class="page-actions">
+    <a href="{{ url_for('transactions.add_income') }}" class="btn btn-primary"><i class="fa fa-plus"></i> Add Income</a>
+    <a href="{{ url_for('export.export_income') }}" class="btn btn-secondary"><i class="fa fa-download"></i> Export CSV</a>
+</div>
+<div class="income-container">
+    <div class="income-card">
+        <h3><i class="fa fa-table"></i> Income Records</h3>
+        {% if income %}
+        <table class="table">
+            <thead>
+                <tr>
+                    <th><i class="fa fa-calendar"></i> Date</th>
+                    <th><i class="fa fa-rupee-sign"></i> Amount</th>
+                    <th><i class="fa fa-building"></i> Source</th>
+                    <th><i class="fa fa-comment"></i> Description</th>
+                    <th><i class="fa fa-cog"></i> Action</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for inc in income %}
+                <tr>
+                    <td>{{ inc.date|ddmmyyyy }}</td>
+                    <td>{{ inc.amount|inr }}</td>
+                    <td>{{ inc.source }}</td>
+                    <td>{{ inc.description }}</td>
+                    <td>
+                        <a href="{{ url_for('transactions.delete_income', income_id=inc.id) }}" 
+                           class="btn btn-danger" 
+                           onclick="return confirm('Are you sure you want to delete this income record?')">
+                            <i class="fa fa-trash"></i> Delete
+                        </a>
+                    </td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+        {% else %}
+        <div class="empty-state">
+            <i class="fa fa-inbox"></i>
+            <h4>No income records yet</h4>
+            <p>Start tracking your income by adding your first income record.</p>
+            <a href="{{ url_for('transactions.add_income') }}" class="btn btn-primary"><i class="fa fa-plus"></i> Add Your First Income</a>
+        </div>
+        {% endif %}
+    </div>
+</div>
+<style>
+.page-hero {
+    background: linear-gradient(90deg, #e9f5ec 0%, #f8fafc 100%);
+    border-radius: 18px;
+    margin: 0 auto 32px auto;
+    padding: 36px 0 24px 0;
+    text-align: center;
+    box-shadow: 0 4px 32px rgba(64,145,108,0.07);
+}
+.page-hero-icon {
+    font-size: 2.8rem;
+    color: #40916c;
+    margin-bottom: 10px;
+}
+.page-hero-content h2 {
+    font-size: 2.3rem;
+    font-weight: bold;
+    color: #102542;
+    margin-bottom: 8px;
+}
+.page-hero-subtitle {
+    color: #555;
+    font-size: 1.15rem;
+    margin-bottom: 0;
+}
+.page-actions {
+    display: flex;
+    gap: 12px;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+.income-container {
+    display: flex;
+    justify-content: center;
+    margin-bottom: 32px;
+}
+.income-card {
+    flex: 1 1 900px;
+    max-width: 900px;
+    background: #fff;
+    border-radius: 18px;
+    box-shadow: 0 4px 16px rgba(0,0,0,0.07);
+    padding: 32px 24px 24px 24px;
+    margin-bottom: 24px;
+    transition: box-shadow 0.2s, transform 0.2s;
+}
+.income-card:hover {
+    box-shadow: 0 8px 32px rgba(64,145,108,0.13);
+    transform: translateY(-2px) scale(1.02);
+}
+.income-card h3 {
+    color: #2d6a4f;
+    font-size: 1.18rem;
+    font-weight: 600;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+.btn-danger {
+    background: #dc3545;
+    color: #fff;
+    border: none;
+    padding: 6px 12px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 0.9rem;
+    transition: background 0.2s;
+}
+.btn-danger:hover {
+    background: #c82333;
+}
+.empty-state {
+    text-align: center;
+    padding: 48px 24px;
+    color: #666;
+}
+.empty-state i {
+    font-size: 3rem;
+    color: #ddd;
+    margin-bottom: 16px;
+}
+.empty-state h4 {
+    color: #333;
+    margin-bottom: 8px;
+}
+.empty-state p {
+    margin-bottom: 24px;
+}
+@media (max-width: 900px) {
+    .page-hero { padding: 24px 0 12px 0; }
+    .page-hero-content h2 { font-size: 1.4rem; }
+    .income-card { min-width: 90vw; }
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,63 @@
+{% extends 'base.html' %}
+{% block title %}Categories | Expense Tracker{% endblock %}
+{% block page_bg %}
+<div class="page-bg" style="background-image:url('https://images.unsplash.com/photo-1504384308090-c894fdcc538d?auto=format&fit=crop&w=1200&q=80');"></div>
+{% endblock %}
+{% block content %}
+<h2 style="text-align:center; color:#102542; font-size:2rem; font-weight:bold; margin-bottom:32px;">Manage Categories</h2>
+<form method="post" class="form" style="max-width: 700px; margin: 0 auto 24px auto; background: #f8f9fa; border-radius: 16px; box-shadow: 0 2px 16px rgba(0,0,0,0.07); padding: 40px 32px; display:flex; gap:12px; align-items:center;">
+    <label for="catName" style="flex:0 0 120px;">Category Name</label>
+    <input type="text" name="name" id="catName" required class="input" style="flex:1;">
+    <button type="button" id="voiceCatBtn" class="btn" title="Speak to fill category" aria-label="Voice input for category" style="background:#2563eb; color:#fff; padding:8px 14px; margin-left:8px;"><i class="fa fa-microphone"></i></button>
+    <div id="voiceCatStatus" style="font-size:0.98rem; color:#2563eb; margin-left:8px;"></div>
+    <button type="submit" class="btn btn-primary">Add Category</button>
+</form>
+<table class="table" style="max-width: 700px; margin: 0 auto;">
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Action</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for cat in categories %}
+        <tr>
+            <td>{{ cat.name }}</td>
+            <td><a href="{{ url_for('categories.delete_category', category_id=cat.id) }}" class="btn">Delete</a></td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+<script>
+    // Voice for new category
+    const voiceCatBtn = document.getElementById('voiceCatBtn');
+    const catName = document.getElementById('catName');
+    const voiceCatStatus = document.getElementById('voiceCatStatus');
+    if (window.SpeechRecognition || window.webkitSpeechRecognition) {
+        const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        const catRecognition = new SpeechRecognition();
+        catRecognition.lang = 'en-US';
+        catRecognition.interimResults = false;
+        catRecognition.maxAlternatives = 1;
+        voiceCatBtn.onclick = function() {
+            voiceCatStatus.textContent = 'Listening...';
+            catRecognition.start();
+        };
+        catRecognition.onresult = function(event) {
+            const transcript = event.results[0][0].transcript;
+            catName.value = transcript;
+            voiceCatStatus.textContent = 'Voice input captured!';
+        };
+        catRecognition.onerror = function(event) {
+            voiceCatStatus.textContent = 'Voice input error: ' + event.error;
+        };
+        catRecognition.onend = function() {
+            setTimeout(() => { voiceCatStatus.textContent = ''; }, 2000);
+        };
+    } else {
+        voiceCatBtn.onclick = function() {
+            voiceCatStatus.textContent = 'Voice input not supported in this browser.';
+        };
+    }
+</script>
+{% endblock %} 
