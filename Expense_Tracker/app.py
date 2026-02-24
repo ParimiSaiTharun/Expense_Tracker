@@ -22,13 +22,23 @@ app = Flask(__name__)
 app.secret_key = os.getenv('SECRET_KEY')
 
 # MySQL connection
-connection = pymysql.connect(
-    host=os.getenv('MYSQL_HOST'),
-    user=os.getenv('MYSQL_USER'),
-    password=os.getenv('MYSQL_PASSWORD'),
-    db=os.getenv('MYSQL_DB'),
-    cursorclass=pymysql.cursors.DictCursor
-)
+import sqlite3
+
+if os.getenv("RENDER"):
+    # Running on Render → use SQLite
+    connection = sqlite3.connect("expense_tracker.db", check_same_thread=False)
+    connection.row_factory = sqlite3.Row
+else:
+    # Running locally → use MySQL
+    connection = pymysql.connect(
+        host=os.getenv('MYSQL_HOST'),
+        user=os.getenv('MYSQL_USER'),
+        password=os.getenv('MYSQL_PASSWORD'),
+        db=os.getenv('MYSQL_DB'),
+        cursorclass=pymysql.cursors.DictCursor
+    )
+
+app.config['DB_CONN'] = connection
 
 connection.Sai = types.MethodType(lambda self: self.cursor(), connection)
 
